@@ -12,6 +12,11 @@ export interface IDocument extends Document {
     name: string
     addedAt: Date
   }>
+  publicAccess?: {
+    enabled: boolean
+    token: string
+    expiresAt: Date
+  }
   createdAt: Date
   updatedAt: Date
 }
@@ -50,6 +55,14 @@ const DocumentSchema = new Schema<IDocument>({
       },
     },
   ],
+  publicAccess: {
+    enabled: {
+      type: Boolean,
+      default: false,
+    },
+    token: String,
+    expiresAt: Date,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

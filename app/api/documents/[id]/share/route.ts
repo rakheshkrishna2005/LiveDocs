@@ -1,0 +1,137 @@
+import { NextResponse } from "next/server"
+import { v4 as uuidv4 } from "uuid"
+import { getCurrentUser } from "@/lib/auth"
+import dbConnect from "@/lib/db"
+import DocumentModel from "@/lib/models/Document"
+
+// GET public access status
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    await dbConnect()
+    const { id } = await params
+    
+    const document = await DocumentModel.findOne({ documentId: id })
+    
+    if (!document) {
+      return NextResponse.json({ error: "Document not found" }, { status: 404 })
+    }
+
+    if (document.ownerId !== user.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    }
+
+    return NextResponse.json({ publicAccess: document.publicAccess })
+  } catch (error) {
+    console.error("[GET_PUBLIC_ACCESS]", error)
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    )
+  }
+}
+
+// Create or update public access
+export async function POST(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { expirationDays } = await request.json()
+    
+    if (!expirationDays || expirationDays < 1 || expirationDays > 30) {
+      return NextResponse.json(
+        { error: "Expiration days must be between 1 and 30" },
+        { status: 400 }
+      )
+    }
+
+    await dbConnect()
+    const { id } = await params
+    
+    const document = await DocumentModel.findOne({ documentId: id })
+    
+    if (!document) {
+      return NextResponse.json({ error: "Document not found" }, { status: 404 })
+    }
+
+    if (document.ownerId !== user.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    }
+
+    // Generate public access token and set expiry
+    const token = uuidv4()
+    const expiresAt = new Date()
+    expiresAt.setDate(expiresAt.getDate() + expirationDays)
+
+    // Update document with public access details
+    document.publicAccess = {
+      enabled: true,
+      token,
+      expiresAt
+    }
+    await document.save()
+
+    return NextResponse.json({ token })
+  } catch (error) {
+    console.error("[SHARE_DOCUMENT]", error)
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    )
+  }
+}
+
+// Disable public access
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    await dbConnect()
+    const { id } = await params
+    
+    const document = await DocumentModel.findOne({ documentId: id })
+    
+    if (!document) {
+      return NextResponse.json({ error: "Document not found" }, { status: 404 })
+    }
+
+    if (document.ownerId !== user.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    }
+
+    // Disable public access
+    document.publicAccess = {
+      enabled: false,
+      token: "",
+      expiresAt: new Date()
+    }
+    await document.save()
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("[DISABLE_PUBLIC_ACCESS]", error)
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    )
+  }
+}

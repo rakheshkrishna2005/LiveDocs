@@ -48,7 +48,7 @@ export function EntryModal({ onComplete, currentUser }: EntryModalProps) {
 
   return (
     <Dialog open={true} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" hideCloseButton={true}>
         <div className="flex justify-center mb-4">
           <div className="relative">
             <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">

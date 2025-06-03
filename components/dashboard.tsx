@@ -18,7 +18,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { v4 as uuidv4 } from "uuid"
 import type { JWTPayload } from "@/lib/auth"
@@ -254,7 +253,7 @@ export function Dashboard({ user }: DashboardProps) {
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3" />
                         <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
-                          {doc.collaborators}
+                          {doc.collaborators + 1}
                         </Badge>
                       </div>
                     </div>
@@ -339,7 +338,7 @@ export function Dashboard({ user }: DashboardProps) {
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3" />
                         <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
-                          {doc.collaborators}
+                          {doc.collaborators + 1}
                         </Badge>
                       </div>
                     </div>

@@ -57,12 +57,6 @@ const documents: Record<string, { content: string; title: string }> = {}
 const documentUsers: Record<string, Record<string, any>> = {}
 const cursors: Record<string, Record<string, any>> = {}
 
-const defaultDocId = "a4aff294-6dc3-479d-a665-2bcff0f9a374"
-documents[defaultDocId] = {
-  content: `# Welcome to LiveDocs!`,
-  title: "Welcome Document",
-}
-
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",

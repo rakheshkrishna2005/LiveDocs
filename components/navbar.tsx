@@ -12,10 +12,11 @@ import { useEffect, useState } from "react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { toast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface NavbarProps {
   documentId: string
@@ -42,17 +43,39 @@ export function Navbar({ documentId, saveStatus, onSave, currentUser }: NavbarPr
   const [shareError, setShareError] = useState("")
   const [isCopied, setIsCopied] = useState(false)
   const [isValidEmail, setIsValidEmail] = useState(true)
+  const [hasPublicAccess, setHasPublicAccess] = useState(false)
+  const [publicUrl, setPublicUrl] = useState("")
+  const [expirationDays, setExpirationDays] = useState(7)
 
   useEffect(() => {
     setShareUrl(`${window.location.origin}/document/${documentId}`)
     if (documentTitle) {
       setTitle(documentTitle)
     }
+
+    // Fetch existing public link info when dialog opens
+    const fetchPublicLinkInfo = async () => {
+      try {
+        const response = await fetch(`/api/documents/${documentId}/share`)
+        const data = await response.json()
+        
+        if (response.ok && data.publicAccess) {
+          setHasPublicAccess(data.publicAccess.enabled)
+          if (data.publicAccess.enabled) {
+            setPublicUrl(`${window.location.origin}/public/document/${documentId}?token=${data.publicAccess.token}`)
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch public link info:", error)
+      }
+    }
+
+    fetchPublicLinkInfo()
   }, [documentId, documentTitle])
 
-  const copyToClipboard = async () => {
+  const copyToClipboard = async (textToCopy: string) => {
     try {
-      await navigator.clipboard.writeText(shareUrl)
+      await navigator.clipboard.writeText(textToCopy)
       setIsCopied(true)
       setTimeout(() => setIsCopied(false), 2000)
       toast({
@@ -107,6 +130,79 @@ export function Navbar({ documentId, saveStatus, onSave, currentUser }: NavbarPr
       router.refresh()
     } catch (error) {
       console.error("Logout error:", error)
+    }
+  }
+
+  const handleCreatePublicLink = async () => {
+    setIsSharing(true)
+    setShareError("")
+
+    try {
+      const response = await fetch(`/api/documents/${documentId}/share`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ expirationDays })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create public link")
+      }
+
+      setPublicUrl(`${window.location.origin}/public/document/${documentId}?token=${data.token}`)
+      setHasPublicAccess(true)
+
+      toast({
+        title: "Public link created!",
+        description: `The document can now be accessed via the public link for ${expirationDays} days`,
+        duration: 3000,
+        className: "bg-green-50 border-green-200",
+      })
+    } catch (error) {
+      setShareError(error instanceof Error ? error.message : "Failed to create public link")
+      toast({
+        title: "Failed to create public link",
+        description: error instanceof Error ? error.message : "Failed to create public link",
+        duration: 3000,
+        variant: "destructive",
+      })
+    } finally {
+      setIsSharing(false)
+    }
+  }
+
+  const handleDisablePublicAccess = async () => {
+    setIsSharing(true)
+    setShareError("")
+
+    try {
+      const response = await fetch(`/api/documents/${documentId}/share`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to disable public access")
+      }
+
+      setHasPublicAccess(false)
+      setPublicUrl("")
+      toast({
+        title: "Public access disabled",
+        description: "The public link has been deactivated",
+        duration: 3000,
+        className: "bg-green-50 border-green-200",
+      })
+    } catch (error) {
+      setShareError(error instanceof Error ? error.message : "Failed to disable public access")
+      toast({
+        title: "Failed to disable public access",
+        description: error instanceof Error ? error.message : "An error occurred",
+        duration: 3000,
+        variant: "destructive",
+      })
+    } finally {
+      setIsSharing(false)
     }
   }
 
@@ -261,7 +357,7 @@ export function Navbar({ documentId, saveStatus, onSave, currentUser }: NavbarPr
                     >
                       <UserCircle className="h-3 w-3 mr-1 text-slate-500" />
                       <Badge variant="secondary" className="text-xs px-1 py-0 ml-1">
-                        {onlineUsers.length}
+                        {onlineUsers.length + 1}
                       </Badge>
                     </Button>
                   </PopoverTrigger>
@@ -270,6 +366,19 @@ export function Navbar({ documentId, saveStatus, onSave, currentUser }: NavbarPr
                       <div className="font-semibold text-xs text-slate-700">Online Users</div>
                     </div>
                     <div className="max-h-48 overflow-y-auto">
+                      <div className="flex items-center gap-2 py-2 px-3 hover:bg-slate-50">
+                        <Avatar className="h-6 w-6">
+                          <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">
+                            <span className="font-semibold">{currentUser.name.charAt(0).toUpperCase()}</span>
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-xs font-medium block truncate">{currentUser.name} (You)</span>
+                          <span className="text-xs text-slate-500 block truncate">{currentUser.email}</span>
+                        </div>
+                        <div className="h-2 w-2 bg-green-400 rounded-full flex-shrink-0"></div>
+                      </div>
+                      {/* Display other online users */}
                       {onlineUsers.map((user) => (
                         <div key={user.id} className="flex items-center gap-2 py-2 px-3 hover:bg-slate-50">
                           <Avatar className="h-6 w-6">
@@ -337,76 +446,142 @@ export function Navbar({ documentId, saveStatus, onSave, currentUser }: NavbarPr
       </div>
 
       <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
-        <DialogContent className="sm:max-w-lg w-full max-w-[calc(100vw-2rem)] mx-4">
+        <DialogContent className="sm:max-w-lg w-full max-w-[calc(100vw-2rem)] p-4 sm:p-6 mx-auto rounded-lg sm:rounded-xl">
           <DialogHeader>
             <DialogTitle>Share document</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-2">
+          <div className="space-y-6 py-2">
             {shareError && (
               <div className="bg-red-50 text-red-700 p-3 rounded-md text-sm flex items-start">
                 <div className="flex-1">{shareError}</div>
               </div>
             )}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email address</Label>
-              <div className="relative">
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter email address"
-                  value={shareEmail}
-                  onChange={(e) => {
-                    setShareEmail(e.target.value)
-                    setShareError("")
-                    setIsValidEmail(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.target.value))
-                  }}
-                  className={`pr-8 w-full ${!isValidEmail && shareEmail ? "border-red-300 focus:border-red-500" : ""}`}
-                />
-                {!isValidEmail && shareEmail && (
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                    <div className="text-red-500">!</div>
+            <div className="space-y-4">
+              <div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="email">Email address</Label>
+                  <div className="relative">
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter email address"
+                      value={shareEmail}
+                      onChange={(e) => {
+                        setShareEmail(e.target.value)
+                        setShareError("")
+                        setIsValidEmail(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.target.value))
+                      }}
+                      className={`pr-8 w-full ${!isValidEmail && shareEmail ? "border-red-300 focus:border-red-500" : ""}`}
+                    />
+                    {!isValidEmail && shareEmail && (
+                      <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                        <div className="text-red-500">!</div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label>Share link</Label>
-              <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                <LinkIcon className="h-3 w-3 text-slate-500 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-slate-700 font-mono break-all leading-relaxed">{shareUrl}</p>
+                  <Button
+                    onClick={handleShareDocument}
+                    disabled={isSharing || !shareEmail.trim() || !isValidEmail}
+                    className={`bg-blue-600 hover:bg-blue-700 w-full sm:w-auto ${!isValidEmail ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    {isSharing ? (
+                      <>
+                        <div className="h-3 w-3 mr-1 animate-spin rounded-full border border-white border-t-transparent"></div>
+                        Sharing...
+                      </>
+                    ) : (
+                      "Share"
+                    )}
+                  </Button>
                 </div>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-6 w-6 transition-all duration-200 flex-shrink-0"
-                  onClick={copyToClipboard}
-                  title="Copy link"
-                >
-                  {isCopied ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
-                </Button>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-sm font-semibold">Public access link</h3>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <LinkIcon className="h-3 w-3 text-slate-500 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      {hasPublicAccess ? (
+                        <p className="text-xs text-slate-700 font-mono break-all leading-relaxed">{publicUrl}</p>
+                      ) : (
+                        <p className="text-xs text-slate-500">Create a public link to allow anyone to view this document</p>
+                      )}
+                    </div>
+                    {hasPublicAccess && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6 transition-all duration-200 flex-shrink-0"
+                        onClick={() => copyToClipboard(publicUrl)}
+                        title="Copy public link"
+                      >
+                        {isCopied ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
+                      </Button>
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2 items-center">
+                    <Select
+                      value={expirationDays.toString()}
+                      onValueChange={(value) => setExpirationDays(Number(value))}
+                      disabled={isSharing}
+                    >
+                      <SelectTrigger className="h-9 w-[110px] border-slate-200 focus:ring-blue-500">
+                        <SelectValue placeholder="Select days" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 30 }, (_, i) => i + 1).map((days) => (
+                          <SelectItem key={days} value={days.toString()}>
+                            {days} {days === 1 ? 'day' : 'days'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Button
+                      variant={hasPublicAccess ? "outline" : "secondary"}
+                      onClick={handleCreatePublicLink}
+                      disabled={isSharing}
+                      className="flex-1"
+                    >
+                      {isSharing ? (
+                        <>
+                          <div className="h-3 w-3 mr-1 animate-spin rounded-full border border-slate-300 border-t-blue-600"></div>
+                          Creating link...
+                        </>
+                      ) : hasPublicAccess ? (
+                        "Create new public link"
+                      ) : (
+                        "Create public link"
+                      )}
+                    </Button>
+                  </div>
+
+                  {hasPublicAccess && (
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        variant="destructive"
+                        onClick={handleDisablePublicAccess}
+                        disabled={isSharing}
+                        className="w-full sm:w-auto"
+                      >
+                        {isSharing ? (
+                          <>
+                            <div className="h-3 w-3 mr-1 animate-spin rounded-full border border-white border-t-transparent"></div>
+                            Disabling access...
+                          </>
+                        ) : (
+                          "Disable public access"
+                        )}
+                      </Button>
+                      <p className="text-xs text-slate-500">Public link will expire in {expirationDays} {expirationDays === 1 ? 'day' : 'days'}</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-          <DialogFooter className="sm:justify-between gap-2 flex-col-reverse sm:flex-row">
-            <Button variant="outline" onClick={() => setShareDialogOpen(false)} className="w-full sm:w-auto">
-              Cancel
-            </Button>
-            <Button
-              onClick={handleShareDocument}
-              disabled={isSharing || !shareEmail.trim() || !isValidEmail}
-              className={`bg-blue-600 hover:bg-blue-700 w-full sm:w-auto ${!isValidEmail ? "opacity-50 cursor-not-allowed" : ""}`}
-            >
-              {isSharing ? (
-                <>
-                  <div className="h-3 w-3 mr-1 animate-spin rounded-full border border-white border-t-transparent"></div>
-                  Sharing...
-                </>
-              ) : (
-                "Share"
-              )}
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
     </header>

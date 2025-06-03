@@ -4,12 +4,14 @@ import { MongoClient } from "mongodb"
 const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017"
 const client = new MongoClient(mongoUri)
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params
+
   try {
     await client.connect()
     const db = client.db("livedocs")
 
-    const result = await db.collection("documents").deleteOne({ documentId: params.id })
+    const result = await db.collection("documents").deleteOne({ documentId: id })
 
     if (result.deletedCount === 0) {
       return NextResponse.json({ error: "Document not found" }, { status: 404 })

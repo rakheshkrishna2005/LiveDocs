@@ -316,7 +316,7 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave }: EditorPro
             >
               <textarea
                 ref={textareaRef}
-                className="w-full h-full p-8 focus:outline-none text-slate-800 min-h-[calc(100vh-16rem)] leading-relaxed resize-none border-none bg-transparent"
+                className="w-full h-full p-8 focus:outline-none text-slate-800 min-h-[calc(100vh-10rem)] leading-relaxed resize-none border-none bg-transparent"
                 onChange={handleTextareaChange}
                 onPaste={handlePaste}
                 onKeyDown={handleKeyDown}
