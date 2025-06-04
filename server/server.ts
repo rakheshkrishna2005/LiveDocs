@@ -21,8 +21,8 @@ interface Document {
   collaborators?: Collaborator[]
 }
 
-const mongoUri = process.env.MONGODB_URI || "mongodb://localhost:27017"
-const client = new MongoClient(mongoUri)
+const mongoUri = process.env.MONGODB_URI 
+const client = new MongoClient(mongoUri!)
 let db: Db
 
 async function connectToMongo(): Promise<void> {
@@ -34,8 +34,6 @@ async function connectToMongo(): Promise<void> {
     console.log("✅ Database indexes created")
   } catch (error) {
     console.error("❌ Failed to connect to MongoDB", error)
-    console.log("💡 Make sure MongoDB is running on localhost:27017")
-    console.log("💡 You can start MongoDB with: mongod --dbpath /path/to/your/db")
   }
 }
 
