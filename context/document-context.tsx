@@ -23,7 +23,7 @@ export function DocumentProvider({
   const updateDocumentTitle = (title: string) => {
     setDocumentTitle(title)
 
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/update-title` || "http://localhost:8080/update-title", {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/update-title` || "https://livedocs-server-production.up.railway.app/update-title", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

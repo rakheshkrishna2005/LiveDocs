@@ -61,7 +61,7 @@ export function Editor({ documentId, onSaveStatusChange, onSave }: EditorProps) 
 
     console.log("🔌 Establishing socket connection for user:", currentUser.displayName)
 
-    const newSocket = io(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080", {
+    const newSocket = io(process.env.NEXT_PUBLIC_API_URL || "https://livedocs-server-production.up.railway.app", {
       forceNew: false,
       reconnection: true,
       reconnectionAttempts: 5,
