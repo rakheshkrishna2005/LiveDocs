@@ -28,10 +28,12 @@ interface EditorProps {
   documentId: string
   onSaveStatusChange: (status: "saved" | "saving" | "unsaved") => void
   onSave: React.MutableRefObject<() => void>
+  initialContent?: string
+  initialTitle?: string
 }
 
-export function TextEditor({ documentId, onSaveStatusChange, onSave }: EditorProps) {
-  const [documentContent, setDocumentContent] = useState<string>("")
+export function TextEditor({ documentId, onSaveStatusChange, onSave, initialContent = "", initialTitle = "Untitled Document" }: EditorProps) {
+  const [documentContent, setDocumentContent] = useState<string>(initialContent)
   const [socket, setSocket] = useState<Socket | null>(null)
   const [cursors, setCursors] = useState<Record<string, CursorPosition>>({})
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
@@ -46,7 +48,8 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave }: EditorPro
 
   useEffect(() => {
     setIsClient(true)
-  }, [])
+    setDocumentTitle(initialTitle)
+  }, [initialTitle, setDocumentTitle])
 
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     e.preventDefault()

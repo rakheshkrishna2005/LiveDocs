@@ -21,7 +21,7 @@ interface Document {
   collaborators?: Collaborator[]
 }
 
-const mongoUri = process.env.MONGODB_URI 
+const mongoUri = process.env.MONGODB_URI
 const client = new MongoClient(mongoUri!)
 let db: Db
 

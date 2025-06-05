@@ -4,7 +4,6 @@ import { getCurrentUser } from "@/lib/auth"
 import dbConnect from "@/lib/db"
 import DocumentModel from "@/lib/models/Document"
 
-// GET public access status
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -38,7 +37,6 @@ export async function GET(
   }
 }
 
-// Create or update public access
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
@@ -71,12 +69,10 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 
-    // Generate public access token and set expiry
     const token = uuidv4()
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + expirationDays)
 
-    // Update document with public access details
     document.publicAccess = {
       enabled: true,
       token,
@@ -94,7 +90,6 @@ export async function POST(
   }
 }
 
-// Disable public access
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
@@ -118,7 +113,6 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 
-    // Disable public access
     document.publicAccess = {
       enabled: false,
       token: "",

@@ -13,6 +13,7 @@ export default function DocumentPage({ params }: { params: Promise<{ id: string 
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved")
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [document, setDocument] = useState<{ title: string; content: string } | null>(null)
   const saveRef = useRef<() => void>(() => {})
   const router = useRouter()
   
@@ -39,6 +40,25 @@ export default function DocumentPage({ params }: { params: Promise<{ id: string 
     getCurrentUser()
   }, [router])
 
+  useEffect(() => {
+    const fetchDocument = async () => {
+      try {
+        const response = await fetch(`/api/documents/${documentId}`)
+        if (!response.ok) {
+          throw new Error("Failed to fetch document")
+        }
+        const data = await response.json()
+        setDocument(data)
+      } catch (error) {
+        console.error("Error fetching document:", error)
+      }
+    }
+
+    if (documentId) {
+      fetchDocument()
+    }
+  }, [documentId])
+
   const handleSave = () => {
     if (saveRef.current) {
       saveRef.current()
@@ -63,7 +83,13 @@ export default function DocumentPage({ params }: { params: Promise<{ id: string 
         <main className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
           <Navbar documentId={documentId} saveStatus={saveStatus} onSave={handleSave} currentUser={currentUser} />
           <div className="flex-1 px-4 md:px-8 lg:px-16 py-6">
-            <TextEditor documentId={documentId} onSaveStatusChange={setSaveStatus} onSave={saveRef} />
+            <TextEditor 
+              documentId={documentId} 
+              onSaveStatusChange={setSaveStatus} 
+              onSave={saveRef}
+              initialContent={document?.content || ""}
+              initialTitle={document?.title || "Untitled Document"}
+            />
           </div>
           {showModal && <EntryModal onComplete={() => setShowModal(false)} currentUser={currentUser} />}
         </main>
