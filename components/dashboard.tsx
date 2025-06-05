@@ -362,20 +362,24 @@ export function Dashboard({ user }: DashboardProps) {
         )}
 
         <AlertDialog open={!!documentToDelete} onOpenChange={(open) => !open && setDocumentToDelete(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
+          <AlertDialogContent className="w-[95vw] max-w-md mx-auto p-4 sm:p-6 rounded-xl sm:rounded-2xl">
+            <AlertDialogHeader className="space-y-2 sm:space-y-3">
+              <AlertDialogTitle className="text-lg sm:text-xl font-semibold">
+                Are you absolutely sure?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-sm sm:text-base text-slate-600">
                 This will permanently delete the document and remove it for all collaborators. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0 pt-4 sm:pt-6">
+              <AlertDialogCancel className="w-full sm:w-auto order-2 sm:order-1">
+                Cancel
+              </AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => documentToDelete && deleteDocument(documentToDelete)}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white order-1 sm:order-2"
               >
-                Delete
+                Delete Document
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

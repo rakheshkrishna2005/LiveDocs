@@ -53,7 +53,6 @@ export function Navbar({ documentId, saveStatus, onSave, currentUser }: NavbarPr
       setTitle(documentTitle)
     }
 
-    // Fetch existing public link info when dialog opens
     const fetchPublicLinkInfo = async () => {
       try {
         const response = await fetch(`/api/documents/${documentId}/share`)
@@ -213,7 +212,6 @@ export function Navbar({ documentId, saveStatus, onSave, currentUser }: NavbarPr
     setShareError("")
 
     try {
-      // First validate if user exists
       const checkUserResponse = await fetch(`/api/auth/user-exists?email=${encodeURIComponent(shareEmail)}`)
       const checkUserData = await checkUserResponse.json()
 
@@ -221,7 +219,6 @@ export function Navbar({ documentId, saveStatus, onSave, currentUser }: NavbarPr
         throw new Error("User with this email address does not exist")
       }
 
-      // If user exists, proceed with sharing
       const response = await fetch("/api/documents", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
