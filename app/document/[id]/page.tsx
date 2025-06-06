@@ -1,99 +1,53 @@
-"use client"
-
-import { useState, useRef, useEffect, use } from "react"
-import { useRouter } from "next/navigation"
+import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { Navbar } from "@/components/navbar"
 import { EntryModal } from "@/components/entry-modal"
 import { TextEditor } from "@/components/text-editor"
 import { UserProvider } from "@/context/user-context"
 import { DocumentProvider } from "@/context/document-context"
+import ClientDocumentPage from './client'
 
-export default function DocumentPage({ params }: { params: Promise<{ id: string }> }) {
-  const [showModal, setShowModal] = useState(true)
-  const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved")
-  const [currentUser, setCurrentUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [document, setDocument] = useState<{ title: string; content: string } | null>(null)
-  const saveRef = useRef<() => void>(() => {})
-  const router = useRouter()
-  
-  const { id: documentId } = use(params)
-
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      try {
-        const response = await fetch("/api/auth/me")
-        if (response.ok) {
-          const userData = await response.json()
-          setCurrentUser(userData.user)
-        } else {
-          router.push("/auth/login")
-        }
-      } catch (error) {
-        console.error("Error getting current user:", error)
-        router.push("/auth/login")
-      } finally {
-        setLoading(false)
-      }
+async function getDocument(documentId: string) {
+  const headersList = await headers()
+  const headersObject = Object.fromEntries(headersList.entries())
+  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/documents/${documentId}`, {
+    headers: headersObject,
+    cache: 'no-store'
+  })
+  if (!response.ok) {
+    if (response.status === 401) {
+      redirect('/auth/login')
     }
-
-    getCurrentUser()
-  }, [router])
-
-  useEffect(() => {
-    const fetchDocument = async () => {
-      try {
-        const response = await fetch(`/api/documents/${documentId}`)
-        if (!response.ok) {
-          throw new Error("Failed to fetch document")
-        }
-        const data = await response.json()
-        setDocument(data)
-      } catch (error) {
-        console.error("Error fetching document:", error)
-      }
-    }
-
-    if (documentId) {
-      fetchDocument()
-    }
-  }, [documentId])
-
-  const handleSave = () => {
-    if (saveRef.current) {
-      saveRef.current()
-    }
+    throw new Error('Failed to fetch document')
   }
+  return response.json()
+}
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-pulse">Loading...</div>
-      </div>
-    )
+async function getCurrentUser() {
+  const headersList = await headers()
+  const headersObject = Object.fromEntries(headersList.entries())
+  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/auth/me`, {
+    headers: headersObject,
+    cache: 'no-store'
+  })
+  if (!response.ok) {
+    redirect('/auth/login')
   }
+  return response.json()
+}
 
-  if (!currentUser) {
-    return null
-  }
+export default async function DocumentPage({ params }: { params: { id: string } }) {
+  const { id: documentId } = await params
+  const [userData, documentData] = await Promise.all([
+    getCurrentUser(),
+    getDocument(documentId)
+  ])
 
   return (
-    <UserProvider>
-      <DocumentProvider documentId={documentId}>
-        <main className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
-          <Navbar documentId={documentId} saveStatus={saveStatus} onSave={handleSave} currentUser={currentUser} />
-          <div className="flex-1 px-4 md:px-8 lg:px-16 py-6">
-            <TextEditor 
-              documentId={documentId} 
-              onSaveStatusChange={setSaveStatus} 
-              onSave={saveRef}
-              initialContent={document?.content || ""}
-              initialTitle={document?.title || "Untitled Document"}
-            />
-          </div>
-          {showModal && <EntryModal onComplete={() => setShowModal(false)} currentUser={currentUser} />}
-        </main>
-      </DocumentProvider>
-    </UserProvider>
+    <ClientDocumentPage 
+      documentId={documentId}
+      initialDocumentData={documentData}
+      userData={userData}
+    />
   )
 }

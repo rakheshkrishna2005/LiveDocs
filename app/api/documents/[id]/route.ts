@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
-import { MongoClient } from "mongodb";
 import { getCurrentUser } from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import DocumentModel from "@/lib/models/Document";
-
-const mongoUri = process.env.MONGODB_URI!;
-const client = new MongoClient(mongoUri);
 
 export async function GET(
   request: Request,
@@ -50,10 +46,8 @@ export async function DELETE(
   try {
     const { id } = await context.params;
 
-    await client.connect();
-    const db = client.db("livedocs");
-
-    const result = await db.collection("documents").deleteOne({ documentId: id });
+    await dbConnect();
+    const result = await DocumentModel.deleteOne({ documentId: id });
 
     if (result.deletedCount === 0) {
       return NextResponse.json({ error: "Document not found" }, { status: 404 });
@@ -63,7 +57,5 @@ export async function DELETE(
   } catch (error) {
     console.error("Error deleting document:", error);
     return NextResponse.json({ error: "Failed to delete document" }, { status: 500 });
-  } finally {
-    await client.close();
   }
 }
