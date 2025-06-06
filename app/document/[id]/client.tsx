@@ -40,7 +40,15 @@ export default function ClientDocumentPage({
   return (
     <UserProvider>
       <DocumentProvider documentId={documentId}>
-        <main className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50">
+        <main className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-blue-50 relative">
+          {!initialDocumentData && (
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-slate-600 font-medium">Loading document...</p>
+              </div>
+            </div>
+          )}
           <Navbar documentId={documentId} saveStatus={saveStatus} onSave={handleSave} currentUser={userData.user} />
           <div className="flex-1 px-4 md:px-8 lg:px-16 py-6">
             <TextEditor 
