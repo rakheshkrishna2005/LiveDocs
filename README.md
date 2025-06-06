@@ -1,6 +1,7 @@
 # 📝 LiveDocs - Real-Time Collaborative Document Editor
 
-🌐 [**Live Deployed Website**](https://livedocs-git-main-rakheshkrishna2005s-projects.vercel.app)
+- 🌐 [**Live Deployed Website**](https://livedocs-git-main-rakheshkrishna2005s-projects.vercel.app)
+- 📺 [**LiveDocs Web App Demo Video**](https://drive.google.com/file/d/1GY7-OCKy553MF3-UvGfyXMSkRt0Kg4pE/view?usp=sharing)
 
 ## 📚 Table of Contents
 
@@ -10,6 +11,7 @@
 - [System Architecture](https://github.com/rakheshkrishna2005/LiveDocs?tab=readme-ov-file#️-system-architecture)
 - [API Endpoints](https://github.com/rakheshkrishna2005/LiveDocs?tab=readme-ov-file#️-api-endpoints)
 - [UI Snapshots](https://github.com/rakheshkrishna2005/LiveDocs?tab=readme-ov-file#-ui-snapshots)
+- [Demo Video](https://github.com/rakheshkrishna2005/LiveDocs?tab=readme-ov-file#-demo-video)
 
 ## 🚀 Key Features
 
@@ -166,4 +168,8 @@ flowchart TD
 ![Cursors](https://github.com/rakheshkrishna2005/LiveDocs/blob/main/public/2.png)
 ![Share](https://github.com/rakheshkrishna2005/LiveDocs/blob/main/public/3.png)
 ![Join and Delete](https://github.com/rakheshkrishna2005/LiveDocs/blob/main/public/4.png)
+
+## 📺 Demo Video
+
+https://github.com/user-attachments/assets/f042c611-b99c-4480-aa1b-d88cedd1ba7e
 
