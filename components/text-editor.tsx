@@ -331,7 +331,7 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave, initialCont
                 onChange={handleTextareaChange}
                 onPaste={handlePaste}
                 onKeyDown={handleKeyDown}
-                placeholder="Start typing your markdown here..."
+                placeholder="Start typing your markdown here. If you already edited the document, wait until it loads..."
                 style={{
                   fontSize: "16px",
                   lineHeight: "1.6",
