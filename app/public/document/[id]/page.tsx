@@ -142,7 +142,16 @@ export default function PublicDocumentPage() {
               {document.content || "# No content"}
             </ReactMarkdown>
             <div className="text-xs text-slate-400 mt-8 pt-4 border-t">
-              Shared via LiveDocs - View mode
+              Shared via{" "}
+              <a
+                href="https://livedocs-nu-liart.vercel.app/"
+                className="text-blue-500 underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                LiveDocs
+              </a>{" "}
+              - View mode
             </div>
           </div>
         </CardContent>

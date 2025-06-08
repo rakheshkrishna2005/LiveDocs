@@ -143,7 +143,7 @@ export function Dashboard({ user }: DashboardProps) {
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-bold text-slate-900">LiveDocs</span>
-                <span className="text-xs text-slate-500 -mt-0.5">Collaborative Editor</span>
+                <span className="text-[10px] text-slate-500 font-bold -mt-0.5">Collaborative Editor</span>
               </div>
             </div>
           </div>
