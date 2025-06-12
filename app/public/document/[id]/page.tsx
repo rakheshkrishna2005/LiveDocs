@@ -144,7 +144,7 @@ export default function PublicDocumentPage() {
             <div className="text-xs text-slate-400 mt-8 pt-4 border-t">
               Shared via{" "}
               <a
-                href="https://livedocs-nu-liart.vercel.app/"
+                href={process.env.NEXT_PUBLIC_APP_URL}
                 className="text-blue-500 underline"
                 target="_blank"
                 rel="noopener noreferrer"
