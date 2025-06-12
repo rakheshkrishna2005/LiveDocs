@@ -46,7 +46,7 @@ app.use(express.json())
 const httpServer = http.createServer(app)
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.NEXT_PUBLIC_APP_URL || "https://livedocs-nu-liart.vercel.app",
+    origin: process.env.NEXT_PUBLIC_APP_URL,
     methods: ["GET", "POST"],
   },
 })
