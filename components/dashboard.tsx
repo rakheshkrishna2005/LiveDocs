@@ -105,7 +105,7 @@ export function Dashboard({ user }: DashboardProps) {
     const now = new Date()
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60))
 
-    if (diffInHours < 1) return "Just now"
+    if (diffInHours < 1) return "Less than an hour ago"
     if (diffInHours < 24) return `${diffInHours} hours ago`
     if (diffInHours < 48) return "1 day ago"
     return `${Math.floor(diffInHours / 24)} days ago`
@@ -150,10 +150,10 @@ export function Dashboard({ user }: DashboardProps) {
           <div className="flex items-center gap-3">
             <Button
               onClick={createNewDocument}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium h-9 px-4"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium h-9 px-2 sm:px-4"
             >
               <Plus className="h-4 w-4 mr-2" />
-              New Document
+              Document
             </Button>
 
             <DropdownMenu>
