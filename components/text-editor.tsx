@@ -38,7 +38,7 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave, initialCont
   const [cursors, setCursors] = useState<Record<string, CursorPosition>>({})
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isClient, setIsClient] = useState(false)
-  const [activeTab, setActiveTab] = useState("edit")
+  const [activeTab, setActiveTab] = useState("preview")
 
   const editorRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -101,7 +101,7 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave, initialCont
 
     console.log("🔌 Establishing socket connection for user:", currentUser.displayName)
 
-    const newSocket = io(process.env.NEXT_PUBLIC_API_URL || "https://livedocs-server-production.up.railway.app", {
+    const newSocket = io(process.env.NEXT_PUBLIC_API_URL, {
       forceNew: false,
       reconnection: true,
       reconnectionAttempts: 5,
