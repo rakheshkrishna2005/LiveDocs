@@ -45,7 +45,7 @@ export function Navbar({ documentId, saveStatus, onSave, currentUser }: NavbarPr
   const [isValidEmail, setIsValidEmail] = useState(true)
   const [hasPublicAccess, setHasPublicAccess] = useState(false)
   const [publicUrl, setPublicUrl] = useState("")
-  const [expirationDays, setExpirationDays] = useState(7)
+  const [expirationDays, setExpirationDays] = useState(30)
 
   useEffect(() => {
     setShareUrl(`${window.location.origin}/document/${documentId}`)
@@ -520,17 +520,19 @@ export function Navbar({ documentId, saveStatus, onSave, currentUser }: NavbarPr
                   
                   <div className="flex gap-2 items-center">
                     <Select
-                      value={expirationDays.toString()}
-                      onValueChange={(value) => setExpirationDays(Number(value))}
+                      value={Math.ceil(expirationDays / 30).toString()}
+                      onValueChange={(value) => setExpirationDays(Number(value) * 30)}
                       disabled={isSharing}
                     >
                       <SelectTrigger className="h-9 w-[110px] border-slate-200 focus:ring-blue-500">
-                        <SelectValue placeholder="Select days" />
+                        <SelectValue placeholder="Select period">
+                          {Math.ceil(expirationDays / 30)} {Math.ceil(expirationDays / 30) === 1 ? 'month' : 'months'}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
-                        {Array.from({ length: 30 }, (_, i) => i + 1).map((days) => (
-                          <SelectItem key={days} value={days.toString()}>
-                            {days} {days === 1 ? 'day' : 'days'}
+                        {Array.from({ length: 12 }, (_, i) => i + 1).map((months) => (
+                          <SelectItem key={months} value={months.toString()}>
+                            {months} {months === 1 ? 'month' : 'months'}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -572,7 +574,7 @@ export function Navbar({ documentId, saveStatus, onSave, currentUser }: NavbarPr
                           "Disable public access"
                         )}
                       </Button>
-                      <p className="text-xs text-slate-500">Public link will expire in {expirationDays} {expirationDays === 1 ? 'day' : 'days'}</p>
+                      <p className="text-xs text-slate-500">Public link will expire in {Math.ceil(expirationDays / 30)} {Math.ceil(expirationDays / 30) === 1 ? 'month' : 'months'}</p>
                     </div>
                   )}
                 </div>

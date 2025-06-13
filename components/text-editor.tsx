@@ -291,11 +291,11 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave, initialCont
               </TabsTrigger>
               <TabsTrigger value="preview" className="flex items-center gap-1">
                 <Eye className="h-3.5 w-3.5" />
-                <span>Preview</span>
+                <span>View</span>
               </TabsTrigger>
             </TabsList>
             <Badge variant="outline" className="text-xs px-2 py-1 border-purple-200 text-purple-700 bg-purple-50">
-              Markdown Editor
+              Markdown Supported
             </Badge>
           </div>
 

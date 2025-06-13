@@ -49,9 +49,9 @@ export async function POST(
 
     const { expirationDays } = await request.json()
     
-    if (!expirationDays || expirationDays < 1 || expirationDays > 30) {
+    if (!expirationDays || expirationDays < 1 || expirationDays > 365) {
       return NextResponse.json(
-        { error: "Expiration days must be between 1 and 30" },
+        { error: "Expiration period must be between 1 and 12 months" },
         { status: 400 }
       )
     }
@@ -71,7 +71,7 @@ export async function POST(
 
     const token = uuidv4()
     const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + expirationDays)
+    expiresAt.setMonth(expiresAt.getMonth() + Math.ceil(expirationDays / 30))
 
     document.publicAccess = {
       enabled: true,
