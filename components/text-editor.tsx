@@ -39,6 +39,7 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave, initialCont
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const [activeTab, setActiveTab] = useState("preview")
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false)
 
   const editorRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -48,8 +49,10 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave, initialCont
 
   useEffect(() => {
     setIsClient(true)
+    setDocumentContent(initialContent)
     setDocumentTitle(initialTitle)
-  }, [initialTitle, setDocumentTitle])
+    setInitialLoadComplete(true)
+  }, [initialContent, initialTitle, setDocumentTitle])
 
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     e.preventDefault()
@@ -97,7 +100,7 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave, initialCont
   }, [handleManualSave, onSave])
 
   useEffect(() => {
-    if (!currentUser?.id || !documentId || !isClient) return
+    if (!currentUser?.id || !documentId || !isClient || !initialLoadComplete) return
 
     console.log("🔌 Establishing socket connection for user:", currentUser.displayName)
 
@@ -120,21 +123,26 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave, initialCont
         displayName: currentUser.displayName,
         email: currentUser.email,
         color: currentUser.color,
+        currentContent: documentContent
       })
     })
 
     newSocket.on("document_data", (data) => {
       console.log("📄 Received document data for user:", currentUser.displayName)
-      const content = data.content || ""
-      setDocumentContent(content)
-      
-      if (textareaRef.current) {
-        textareaRef.current.value = content
+      if (data.content && data.content !== documentContent) {
+        const content = data.content
+        setDocumentContent(content)
+        
+        if (textareaRef.current) {
+          textareaRef.current.value = content
+        }
+        
+        if (data.title) {
+          setDocumentTitle(data.title)
+        }
+        onSaveStatusChange("saved")
+        setHasUnsavedChanges(false)
       }
-      
-      setDocumentTitle(data.title || "Untitled Document")
-      onSaveStatusChange("saved")
-      setHasUnsavedChanges(false)
     })
 
     newSocket.on("update", (data) => {
@@ -217,7 +225,7 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave, initialCont
       newSocket.disconnect()
       socketRef.current = null
     }
-  }, [currentUser?.id, documentId, isClient])
+  }, [currentUser?.id, documentId, isClient, initialLoadComplete])
 
   const handleContentChange = (newContent?: string) => {
     const content = newContent ?? (textareaRef.current?.value || "")
@@ -279,8 +287,28 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave, initialCont
     }
   }, [documentContent])
 
+  if (!isClient) {
+    return (
+      <div className="max-w-5xl mx-auto w-full">
+        <Card className="shadow-lg border-slate-200 overflow-hidden">
+          <div className="p-8 text-center">
+            <div className="animate-pulse">Loading editor...</div>
+          </div>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-5xl mx-auto w-full">
+      {(!isClient || !documentContent) && (
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-slate-600 font-medium">Loading editor...</p>
+          </div>
+        </div>
+      )}
       <Card className="shadow-lg border-slate-200 overflow-hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="border-b border-slate-200 bg-slate-50/50 p-2 flex items-center justify-between">
@@ -295,7 +323,7 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave, initialCont
               </TabsTrigger>
             </TabsList>
             <Badge variant="outline" className="text-xs px-2 py-1 border-purple-200 text-purple-700 bg-purple-50">
-              Markdown Supported
+              Markdown Editor
             </Badge>
           </div>
 
