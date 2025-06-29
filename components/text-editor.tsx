@@ -287,18 +287,6 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave, initialCont
     }
   }, [documentContent])
 
-  if (!isClient) {
-    return (
-      <div className="max-w-5xl mx-auto w-full">
-        <Card className="shadow-lg border-slate-200 overflow-hidden">
-          <div className="p-8 text-center">
-            <div className="animate-pulse">Loading editor...</div>
-          </div>
-        </Card>
-      </div>
-    )
-  }
-
   return (
     <div className="max-w-5xl mx-auto w-full">
       {(!isClient || !documentContent) && (
