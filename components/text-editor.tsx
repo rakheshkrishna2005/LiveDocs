@@ -289,14 +289,6 @@ export function TextEditor({ documentId, onSaveStatusChange, onSave, initialCont
 
   return (
     <div className="max-w-5xl mx-auto w-full">
-      {(!isClient || !documentContent) && (
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-slate-600 font-medium">Loading editor...</p>
-          </div>
-        </div>
-      )}
       <Card className="shadow-lg border-slate-200 overflow-hidden">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="border-b border-slate-200 bg-slate-50/50 p-2 flex items-center justify-between">
