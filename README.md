@@ -1,7 +1,7 @@
 # 📝 LiveDocs - Real-Time Collaborative Document Editor
 
-- 🌐 [**Live Deployed Website**](https://livedocs-git-main-rakheshkrishna2005s-projects.vercel.app)
-- 📺 [**LiveDocs Web App Demo Video**](https://drive.google.com/file/d/1GY7-OCKy553MF3-UvGfyXMSkRt0Kg4pE/view?usp=sharing)
+- 🌐 [**Live Deployed Website**](https://livedocs-io.vercel.app)
+- 📺 [**LiveDocs Web App Demo Video**](https://youtu.be/9X43KGmAXXw)
 
 ## 📚 Table of Contents
 
